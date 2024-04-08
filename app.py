@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import numpy as np
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import tensorflow as tf
+from tensorflow import keras
 from tensorflow.keras.preprocessing.text import Tokenizer
 
 app = Flask(__name__)
@@ -11,11 +12,11 @@ model = None
 tokenizer = None
 max_sequence_len = 17  # Update this with the value used during training
 
-@app.before_first_request
+
 def load_model_and_tokenizer():
-    global model, tokenizer
+    global model, tokenizer  # Declare both model and tokenizer as global inside the function
     if model is None:
-        model = tf.keras.models.load_model('trained_model')
+        model = tf.saved_model.load('trained_model')
 
     if tokenizer is None:
         with open('dataset/sherlock-holm.es_stories_plain-text_advs.txt', 'r', encoding='utf-8') as file:
@@ -23,6 +24,10 @@ def load_model_and_tokenizer():
 
         tokenizer = Tokenizer()
         tokenizer.fit_on_texts([text])
+    return model, tokenizer
+
+# Load the model and tokenizer before running the Flask app
+load_model_and_tokenizer()
 
 @app.route('/')
 def index():
@@ -48,12 +53,16 @@ def generate():
             token_list = tokenizer.texts_to_sequences([current_seed])[0]
 
             # Ensure that the token_list has the same length as max_sequence_len
-            # You may need to pad or trim the input sequence as necessary
             token_list = pad_sequences([token_list], maxlen=max_sequence_len, padding='pre')
 
-            # Predict the probabilities and apply temperature scaling
-            predictions = model.predict(token_list)[0]
-            predictions = np.log(predictions) 
+            # Adjusted prediction step using the serving signature
+            serving_fn = model.signatures['serving_default']
+            token_tensor = tf.convert_to_tensor(token_list, dtype=tf.int32)
+            predictions = serving_fn(embedding_input=tf.cast(token_tensor, tf.float32))[list(serving_fn.structured_outputs.keys())[0]]
+
+            # Apply temperature scaling
+            predictions = predictions.numpy()[0]
+            predictions = np.log(predictions) / temperature
             exp_predictions = np.exp(predictions)
             predicted_probabilities = exp_predictions / np.sum(exp_predictions)
 
@@ -73,3 +82,7 @@ def generate():
         results.append(predicted_text)
 
     return jsonify({'results': results})
+
+
+if __name__ == "__main__":
+    app.run()
