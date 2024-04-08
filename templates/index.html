@@ -4,49 +4,53 @@
 <head>
     <title>Text Prediction Model</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.15/dist/tailwind.min.css" rel="stylesheet">
-
 </head>
 
-<body>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full md:max-w-4xl mx-auto flex flex-col">
-            <h1 class="text-3xl font-bold mb-4 text-center text-blue-500">Text Prediction</h1>
-            <form id="form" class="mb-4">
-                <div class="mb-6">
-                    <label for="seed_text" class="block text-gray-700 font-semibold mb-2">Input Text (click to use a sample):
-                        <span id="sampleInput" class="text-blue-500 cursor-pointer">Generate Random</span>
-                    </label>
-                    <textarea name="seed_text" id="seed_text" rows="4" class="border p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300" placeholder="Enter your text here..."></textarea>
-                </div>
+<body class="bg-gray-100">
+    <div class="flex">
+        <!-- Sidebar for History Titles -->
+        <div class="w-64 bg-white min-h-screen p-5 shadow-lg">
+            <h2 class="text-xl font-bold mb-5">History</h2>
+            <ul id="historyList" class="list-disc pl-4">
+                <!-- History items will be added here dynamically -->
+            </ul>
+        </div>
 
+        <!-- Main Content -->
+        <div class="flex-1 flex items-center justify-center">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-full md:max-w-4xl mx-auto flex flex-col">
+                <h1 class="text-3xl font-bold mb-4 text-center text-blue-500">Text Prediction</h1>
+                <form id="form" class="mb-4">
+                    <div class="mb-6">
+                        <label for="seed_text" class="block text-gray-700 font-semibold mb-2">
+                            Input Text (click to use a sample):
+                            <span id="sampleInput" class="text-blue-500 cursor-pointer">Generate Random</span>
+                        </label>
+                        <textarea name="seed_text" id="seed_text" rows="4" class="border p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300" placeholder="Enter your text here..."></textarea>
+                    </div>
 
-                <div class="mb-6">
-                    <label for="next_words" class="block text-gray-700 font-semibold mb-2">Number of Words to Predict:</label>
-                    <input type="range" name="next_words" id="next_words" min="1" max="15" value="3" class="border p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300">
-                    <div id="tooltip" class="hidden bg-blue-500 text-white text-xs py-1 px-2 rounded-md absolute top-0 left-1/2 transform -translate-x-1/2 mt-2">3 words</div>
+                    <div class="mb-6">
+                        <label for="next_words" class="block text-gray-700 font-semibold mb-2">
+                            Number of Words to Predict:
+                        </label>
+                        <input type="range" name="next_words" id="next_words" min="1" max="15" value="3" class="border p-2 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300">
+                        <div id="tooltip" class="hidden bg-blue-500 text-white text-xs py-1 px-2 rounded-md absolute top-0 left-1/2 transform -translate-x-1/2 mt-2">3 words</div>
+                    </div>
+                    <button type="submit" class="bg-blue-500 hover-bg-blue-700 text-white py-2 px-4 rounded-md w-full font-semibold">Predict</button>
+                </form>
+                <div id="loader" class="hidden mt-4 text-center">
+                    <div class="relative flex justify-center items-center">
+                        <div class="absolute animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-purple-500"></div>
+                        <img src="https://www.svgrepo.com/show/509001/avatar-thinking-9.svg" class="rounded-full h-28 w-28">
+                    </div>
                 </div>
-                <button type="submit" class="bg-blue-500 hover-bg-blue-700 text-white py-2 px-4 rounded-md w-full font-semibold">Predict</button>
-            </form>
-            <div id="loader" class="hidden mt-4 text-center">
-                <div class="relative flex justify-center items-center">
-                    <div class="absolute animate-spin rounded-full h-32 w-32 border-t-4 border-b-4 border-purple-500"></div>
-                    <img src="https://www.svgrepo.com/show/509001/avatar-thinking-9.svg" class="rounded-full h-28 w-28">
+                <div id="result" style="display: none;">
+                    <h2 class="text-2xl font-bold mb-4 text-center text-blue-500">Predicted Text</h2>
+                    <ul id="generated_results" class="list-disc pl-8 text-gray-700"></ul>
                 </div>
-                <!-- <div class="relative inline-block">
-                    <div class="w-10 h-10 border-blue-500 border-2 rounded-full"></div>
-                    <div class="w-10 h-10 border-blue-700 border-t-2 animate-spin rounded-full absolute left-0 top-0"></div>
-                </div> -->
-            </div>
-            <div id="result" style="display: none;">
-                <h2 class="text-2xl font-bold mb-4 text-center text-blue-500"> Predictated Text</h2>
-
-                <ul id="generated_results" class="list-disc pl-8 text-gray-700"></ul>
             </div>
         </div>
     </div>
-
-
-
 
     <script>
         const seedText = document.querySelector('#seed_text');
@@ -67,16 +71,11 @@
                 } else {
                     generatedResults.innerHTML = '';
                     loader.style.display = 'none';
-
                     document.querySelector('#result').style.display = 'none';
                 }
             }, 1000); // Delay text generation for 1 second
         });
 
-        /*     nextWords.addEventListener('input', () => {
-            loader.style.display = 'block'; // Show loading indicator
-            generateText(seedText.value);
-        }); */
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             loader.style.display = 'block'; // Show loading indicator
@@ -95,87 +94,64 @@
                 })
                 .then(response => {
                     if (!response.ok) {
-
-                        alert('Memory limit exceeded. This model is hosted with only 512 MB, which may not be sufficient for this deep learning model. For more details, please visit https://github.com/mayankhurana/Next-Word-Predictor.');
+                        alert('Memory limit exceeded. This model is hosted with only 512 MB, which may not be sufficient for this deep learning model. For more details, please visit https://github.com/Devbijwe/Next-Word-Prediction-Model.');
                         loader.style.display = 'none'; // Hide the loading indicator
-
-
-
                     }
                     return response.json();
                 })
                 .then(data => {
                     loader.style.display = 'none'; // Hide loading indicator
-
                     generatedResults.innerHTML = ''; // Clear previous results
 
                     data.results.forEach(result => {
                         const listItem = document.createElement('li');
-
-                        // Create a span for the generated result and style it differently
                         const resultSpan = document.createElement('span');
                         resultSpan.textContent = result;
                         resultSpan.style.color = 'blue';
 
-                        // Create a span for the input text
                         const inputSpan = document.createElement('span');
                         inputSpan.textContent = seedText;
 
-                        // Append the spans to the list item
                         listItem.appendChild(inputSpan);
                         listItem.appendChild(document.createTextNode(' ')); // Add a space
                         listItem.appendChild(resultSpan);
 
-                        // Append the list item to the results
                         generatedResults.appendChild(listItem);
                     });
 
                     document.querySelector('#result').style.display = 'block';
-                }).catch(error => {
-                    alert('Memory limit exceeded. This model is hosted with only 512 MB, which may not be sufficient for this deep learning model. For more details, please visit https://github.com/Devbijwe/Next-Word-Prediction-Model.');
-                    loader.style.display = 'none'; // Hide the loading indicator
 
+                    // Append to history list
+                    const historyItem = document.createElement('li');
+                    historyItem.textContent = seedText;
+                    document.querySelector('#historyList').appendChild(historyItem);
+                }).catch(error => {
+                    alert('Memory limit exceeded. This model is hosted with only 512 MB, which may not be sufficient for this deep learning model. For more details, please visit https://github.com/mayankhurana/Next-Word-Predictor/tree/main.');
+                    loader.style.display = 'none'; // Hide the loading indicator
                 });
         }
+
         const sampleInputs = [
-            "I will leave if they",
-            "I will leave if they marry",
-            "The sun is shining and the",
-            "She opened the door and saw",
-            "He smiled and said, 'I will'",
-            "They went to the beach and",
-            "In the morning, the birds started",
-            "It was a dark and stormy",
-            "As the day turned into night,",
-            "The old man sat on his",
-            "Once upon a time, in a",
-            "There was a cat that always",
-            "When she looked in the mirror,",
-            "On a cold winter day, a"
+            "I will leave if they", "I will leave if they marry", "The sun is shining and the",
+            "She opened the door and saw", "He smiled and said, 'I will'", "They went to the beach and",
+            "In the morning, the birds started", "It was a dark and stormy", "As the day turned into night,",
+            "The old man sat on his", "Once upon a time, in a", "There was a cat that always",
+            "When she looked in the mirror,", "On a cold winter day, a"
         ];
 
-
         const sampleInput = document.getElementById("sampleInput");
-
-
         sampleInput.addEventListener("click", () => {
-            // Get a random sample input from the array
             const randomIndex = Math.floor(Math.random() * sampleInputs.length);
             const randomSample = sampleInputs[randomIndex];
-
-            // Set the selected sample input in the textarea
             seedText.value = randomSample;
         });
 
-        // const nextWords = document.querySelector('#next_words');
         const tooltip = document.querySelector('#tooltip');
-
         nextWords.addEventListener('input', () => {
             const value = nextWords.value;
             tooltip.textContent = `${value} word${value > 1 ? 's' : ''}`;
             tooltip.style.display = 'block';
 
-            // Position the tooltip
             const rect = nextWords.getBoundingClientRect();
             tooltip.style.top = `${rect.top - tooltip.clientHeight - 8}px`;
             tooltip.style.left = `${rect.left + rect.width / 2}px`;
