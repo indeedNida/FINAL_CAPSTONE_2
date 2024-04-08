@@ -62,3 +62,10 @@ The text prediction model is built using TensorFlow and Keras. It's designed to 
 ## Contributing
 
 Contributions are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+## Screenshots
+
+<img width="940" alt="Screenshot 2024-04-08 at 1 08 16 PM" src="https://github.com/mayankhurana/Next-Word-Predictor/assets/146905878/dfa71b46-9d78-4efd-8b83-37d5b8417644">
+<img width="488" alt="Screenshot 2024-04-08 at 1 08 30 PM" src="https://github.com/mayankhurana/Next-Word-Predictor/assets/146905878/4024e5dc-92ae-4183-878c-b8dc8d4e57c1">
+<img width="241" alt="Screenshot 2024-04-08 at 1 08 42 PM" src="https://github.com/mayankhurana/Next-Word-Predictor/assets/146905878/62865be3-008b-463c-8128-90abe1148b56">
+
